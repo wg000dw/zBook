@@ -1,0 +1,294 @@
+
+/*
+Prepare - test scala on zeppelin
+
+Other key word - 액터 기반의 아카(akka) Framework
+                 Play Framework
+                 Slick Framework
+                 Typesafe 기술을 이용한 반응형 웹
+*/
+
+//----------------------------------------------------------------------------
+// valiable define
+val yourPast : String = "good scala"
+
+// class define : getter, setter
+class Money1(var amount:Int)
+val notMuch = new Money1(2)
+notMuch.amount = 3
+
+// case class : javabean style class
+case class Money2(amount:Int=1, currency:String="USD")
+val someEur = Money2(currency="EUR")
+
+// use copy 
+val oneUSD = someEur.copy(currency="USD")
+
+// def function 
+case class Money(var amount:Int=1, var currency:String="USD"){
+    def +(other:Money) : Money = Money(amount + other.amount)
+}
+//Money(12) + Money(34)
+
+// list
+val numbers = List(1,2,5)
+numbers.foreach{ n:Int => println("Number "+n)}
+
+
+//----------------------------------------------------------------------------
+// 컬렉션 연산
+val numbers = List(1,2,3,4,5,6)
+val reverseList = numbers.reverse
+val afew = numbers drop 2 take 3
+val towElementList = List(6).::(5)
+val concatList = afew:::towElementList
+
+case class Money(val amount:Int=1, val currency:String="USD")
+val amounts = List( Money(10,"USD"),Money(10,"USD"),Money(2,"EUR"),Money(2,"EUR") )
+val first = amounts.head
+val tail = amounts.tail
+
+// filter & partition
+val eur = amounts.filter( money => money.currency=="EUR" )
+val eur = amounts.filter(_.currency=="USD")
+val allAmounts = amounts.partition(_.currency=="EUR")
+
+// tuple
+val eur = allAmounts._1
+val other = allAmounts._2
+val (eur, other) = amounts.partition(_.currency=="EUR")
+
+
+//----------------------------------------------------------------------------
+// map
+val wallet = Map( "USD"-> 10, "EUR"->2 )
+val tenDollar = "USD"->10
+val newWallet = wallet + ("GBP"->20)
+//wallet("GBP")
+
+// option : .get()
+val someEur = wallet.get("EUR")
+val someGBP = wallet.get("GBP")
+
+// petern matching
+val status = someEur match {
+             case None => "noting currency"
+             case Some(value) => "I have "+ value +" EUR"
+             } 
+
+// map mathod
+List(1,2,3,4).map(_+1)
+def increment = (x:Int) => x+1
+List(1,2,3,4).map(increment)
+
+val printAmounts = amounts.map(m=> m.amount+" "+m.currency)
+
+//----------------------------------------------------------------------------
+// String Interpolation (인터폴레이션)
+val many = 10000.2345
+
+val amount = s"$many euros"
+
+val amount = f"$many%12.2f euros"
+
+val amount = s"${many*2} euros"
+
+case class Money(val amount:Int=1, val currency:String="USD")
+val amounts = List( Money(10,"USD"),Money(10,"USD"),Money(2,"EUR"),Money(2,"EUR") )
+
+val printAmounts = amounts.map(m=> s"${m.amount} ${m.currency}")
+
+// groupby 메소드
+val sortAmounts = amounts.groupBy(_.currency)
+
+// foldLeft 메소드
+val numbers = List(1,2,3,4,5,6)
+val sumNumbers = numbers.foldLeft(0){ (total,element)=>total+element }
+val sumNumbers = numbers.sum
+
+
+//----------------------------------------------------------------------------
+// javaBean stype property
+import scala.beans.BeanProperty
+class Company(@BeanProperty var name:String)
+val sun = new Company("Sun Microsystems")
+sun.getName()
+sun.setName("Oracle")
+sun.name
+
+//----------------------------------------------------------------------------
+// 스칼라와 자바의 객체지향 지원방식
+class Customer(var customerId:Int, var zip:String){
+    def this(zip:String) = this(0,zip)
+    def getCustomerId() = customerId
+    def setCustomerId(cust:Int): Unit = {customerId=cust}
+}
+
+val customer = new Customer("123 45")
+customer.customerId
+customer.zip
+
+//----------------------------------------------------------------------------
+// 자바 인터페이스를 개선한 스칼라 트레잇
+class Customer(val name:String, val discountCode:String="N"){
+    def discounts() : List[Int] = List(5)
+    override
+    def toString() = "Applied discounts : " + discounts.mkString(" ", "%, ", "% ")
+}
+
+trait VIPCustomer extends Customer{
+    override
+    def discounts = super.discounts ::: List(10)
+}
+
+trait GoldCustomer extends Customer{
+    override
+    def discounts = if(discountCode.equals("H")){ 
+                        super.discounts ::: List(20)
+                    }else{
+                        super.discounts ::: List(15)
+                    }
+}
+
+object Main{
+    def main(args:Array[String]){
+        val myDiscounts = new Customer("Thomas", "H") with VIPCustomer with GoldCustomer
+        println(myDiscounts)
+    }
+}
+
+Main.main(Array.empty)
+
+//----------------------------------------------------------------------------
+// 예외처리
+def parse(numberAsString:String) =
+try{
+    Integer.parseInt(numberAsString)
+}catch{
+    case nfe:NumberFormatException =>
+        println("Wrong format for number "+numberAsString)
+    case e:Exception =>
+        println("Error when parsing number "+numberAsString)
+}
+
+//----------------------------------------------------------------------------
+// different java and scala
+val amountBought = 5000
+val customerLevel = if(amountBought > 3000) "Gold" else "Silver"
+
+class Customer(
+    val firstName: String,
+    val lastName : String,
+    val age      : Int,
+    val address  : String,
+    val country  : String,
+    val hasGoodRating: Boolean
+){
+    override
+    def toString() = s" $firstName $lastName"
+}
+
+//----------------------------------------------------------------------------
+// nameing role use camel case
+object Constants {
+    val MyAge = 20
+}
+
+val amounts = List(3,6,7,10) map(x => x+1)
+val amounts = List(3,6,7,10) map{x => val y = x + 1 
+                                 println("Result="+ y) 
+                                 y
+                                }
+                                
+val sumAmounts = amounts.foldLeft(0)(_+_)
+
+val sumAmounts = amounts reduce (_+_)
+
+val sumAmounts = amounts reduce ( (tot,x) => tot + x )
+
+/*
+http://docs.scala-lang.org/style
+*/
+
+
+//----------------------------------------------------------------------------
+// for 조건제시문
+// 변환
+for{
+    y <- List(1,2,3,4,5)
+} yield "T" + y
+
+// 2개의 제너레이터 사용
+for{
+    //word <- List("Hello","Scala")
+    word <- List("안녕하세ㅇ","스칼라 ㅋㅋ")
+    char <- word
+} yield char//.isLower //.toLower
+
+// xml에서 도시명만 가저오는 예제
+def extractCity(xml: scala.xml.Elem) =
+  for{
+      elem <- xml \\ "division"
+      name <- elem \ "name"
+  } yield name.text
+  
+val cityNems = extractCity(citiesXML())
+
+// 튜플에 담기
+def extractCityLoc(xml: scala.xml.Elem) =
+  for{
+      elem <- xml \\ "division"
+      name <- elem \ "name"
+      latitude <- elem \ "lat"
+      longitude <- elem \ "lng"
+  } yield (name.text, latitude.text, longitude.text)
+  
+val cityLoc = extractCityLoc(citiesXML())
+
+val (honolulu, lat, lng) = cityLoc find (_._1 == "Honolulu") getOrElse("Honolulu", "21", "-157")
+
+var honolulu = cityLoc find { case(city, _, _) => city == "Honolulu" }
+
+
+//----------------------------------------------------------------------------
+// repl을 script engine으로 활용
+import javax.script.ScriptEngineManager
+val engine = new ScriptEngineManager().getEngineByName("scala")
+engine.put("n", 5)
+engine.eval("1 to n.asInstanceOf[Int] foreach println")
+
+//----------------------------------------------------------------------------
+// xml 다루기
+val books = 
+<Library>
+{ List("book1,15,30.00", "book2,10,25.50").map { row => row split "," }.map { b => <book title={b(0)} quantity={b(1)} price={b(2)} /> } 
+}
+</Library>
+
+//----------------------------------------------------------------------------
+// json 다루기
+// json 다루기
+import scala.util.parsing.json._
+
+case class Book(title:String, quantity:Double)
+val book1 = Book("Scala for Java Developers", 10)
+val book2 = Book("Effective Java", 12)
+val books = List(book1, book2)
+
+val regex = """(.*)(Scala|Java)(.*)""".r
+def whatis(that:Any) = that match{
+    case Book(t,_) if (t contains "Scala") => s"${t} is a book about Scala"
+    case Book(_,_) => s"$that is a book"
+    case regex(_,word,_) => s"$that is something about ${word}"
+    case head::tail => s"$that is a list of books"
+    case _ => "You tell me"
+} 
+
+whatis(book1)
+
+whatis(books)
+
+whatis("Scala patten matching")
+
+whatis("Love")
+
